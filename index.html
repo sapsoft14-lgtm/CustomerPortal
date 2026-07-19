@@ -83,18 +83,9 @@
     .tl-node:last-child::after { display: none; }
     .tl-time { font-size: 10.5px; color: #94a3b8; font-weight: 600; margin-bottom: 3px; }
     .tl-status { font-size: 13px; font-weight: 800; color: #1e293b; margin-bottom: 3px; }
-    .tl-notes { font-size: 12px; color: #475569; line-height: 1.45; }
-    .tl-imgs { display: flex; gap: 6px; margin-top: 6px; flex-wrap: wrap; }
-    .tl-thumb { width: 46px; height: 46px; object-fit: cover; border-radius: 5px; border: 1px solid #cbd5e1; cursor: pointer; background: #000; }
-
     .empty-state { text-align: center; padding: 30px 10px; color: #94a3b8; font-size: 13px; }
     .spinner { width: 26px; height: 26px; border: 3px solid #e2e8f0; border-top-color: var(--blue); border-radius: 50%; margin: 20px auto; animation: spin .7s linear infinite; }
     @keyframes spin { to { transform: rotate(360deg); } }
-
-    .lightbox { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.9); align-items: center; justify-content: center; z-index: 9999; padding: 20px; }
-    .lightbox.show { display: flex; }
-    .lightbox img { max-width: 100%; max-height: 100%; border-radius: 6px; }
-    .lightbox-close { position: absolute; top: 18px; right: 22px; color: white; font-size: 30px; cursor: pointer; }
 
     .footer-note { text-align: center; font-size: 10.5px; color: #94a3b8; margin-top: 6px; padding-bottom: 20px; }
 </style>
@@ -112,7 +103,7 @@
         <h1 class="step-title">Check Your Repair Status</h1>
         <p class="step-sub">Enter the mobile number you gave us when you dropped off your item.</p>
         <label for="mobileInput">Mobile Number</label>
-        <input type="tel" id="mobileInput" placeholder="e.g. 0771234567" inputmode="numeric">
+        <input type="tel" id="mobileInput" placeholder="e.g.771234567(Without "0")" inputmode="numeric">
         <button class="btn btn-primary" id="lookupBtn" onclick="lookupJobs()">View My Jobs</button>
         <div class="msg" id="mobileMsg"></div>
     </div>
@@ -145,11 +136,6 @@
     </div>
 
     <p class="footer-note">Having trouble? Call us on the number printed on your job card.</p>
-</div>
-
-<div class="lightbox" id="lightbox" onclick="closeLightbox()">
-    <span class="lightbox-close">&times;</span>
-    <img id="lightboxImg" src="">
 </div>
 
 <script>
@@ -290,12 +276,13 @@
         if (!history || history.length === 0) {
             tlContainer.innerHTML = '<div class="empty-state">No status updates logged yet.</div>';
         } else {
+            // Customer view shows status + timestamp only — technician
+            // remarks and job photos are internal detail and aren't sent
+            // to this page at all (see getCustomerJobStatus on the backend).
             tlContainer.innerHTML = history.map((h, idx) => `
                 <div class="tl-node ${idx === 0 ? 'tl-latest' : ''}">
                     <div class="tl-time">${escHtml(h.timestamp || '')}</div>
                     <div class="tl-status">${escHtml(h.status || '')}</div>
-                    ${h.notes ? `<div class="tl-notes">${escHtml(h.notes)}</div>` : ''}
-                    ${h.images && h.images.length ? `<div class="tl-imgs">${h.images.map(src => `<img class="tl-thumb" src="${src}" onclick="event.stopPropagation(); openLightbox('${src}')">`).join('')}</div>` : ''}
                 </div>
             `).join('');
         }
@@ -305,14 +292,6 @@
 
     function escHtml(s) {
         return (s || '').toString().replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-    }
-
-    function openLightbox(src) {
-        document.getElementById('lightboxImg').src = src;
-        document.getElementById('lightbox').classList.add('show');
-    }
-    function closeLightbox() {
-        document.getElementById('lightbox').classList.remove('show');
     }
 
     // ── Entry point: read ?mobile= and ?job= from the QR link ─────────────
