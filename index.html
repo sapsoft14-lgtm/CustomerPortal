@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Track My Repair - SAP Computers</title>
+<style>
+    :root {
+        --navy: #1e3a8a;
+        --navy-dark: #1e293b;
+        --blue: #2563eb;
+        --green: #059669;
+        --bg: #f1f5f9;
+    }
+    * { box-sizing: border-box; }
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background: var(--bg);
+        margin: 0;
+        padding: 16px;
+        color: var(--navy-dark);
+        min-height: 100vh;
+    }
+    .wrap { max-width: 480px; margin: 0 auto; }
+
+    .brand-header { text-align: center; margin-bottom: 18px; padding-top: 6px; }
+    .brand-header .biz-name { font-size: 18px; font-weight: 800; color: var(--navy); margin: 0; }
+    .brand-header .biz-sub { font-size: 12px; color: #64748b; margin-top: 2px; }
+
+    .card { background: white; border-radius: 12px; padding: 20px; box-shadow: 0 4px 14px rgba(0,0,0,0.06); border: 1px solid #e2e8f0; margin-bottom: 16px; }
+
+    h1.step-title { font-size: 16px; margin: 0 0 4px 0; color: var(--navy); }
+    p.step-sub { font-size: 12.5px; color: #64748b; margin: 0 0 16px 0; line-height: 1.5; }
+
+    label { font-size: 11px; font-weight: 700; text-transform: uppercase; color: #475569; display: block; margin-bottom: 5px; }
+    input[type=tel] { width: 100%; padding: 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 16px; background: #f8fafc; }
+    input[type=tel]:focus { outline: 2px solid var(--blue); background: white; }
+
+    .btn { display: block; width: 100%; padding: 13px; border: none; border-radius: 8px; font-weight: 700; font-size: 14px; cursor: pointer; margin-top: 14px; }
+    .btn-primary { background: var(--navy); color: white; }
+    .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; }
+    .btn-link { background: none; color: var(--blue); font-weight: 700; font-size: 12.5px; padding: 8px 0; margin: 0; text-align: left; width: auto; }
+
+    .msg { font-size: 12.5px; font-weight: 600; margin-top: 10px; display: none; }
+    .msg.error { color: #b91c1c; }
+    .msg.info { color: #475569; }
+
+    /* Job picker list */
+    .job-pick-item { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 13px 14px; border: 1px solid #e2e8f0; border-radius: 9px; margin-bottom: 10px; cursor: pointer; background: #f8fafc; transition: border-color .15s, background .15s; }
+    .job-pick-item:hover, .job-pick-item:active { border-color: var(--blue); background: #eff6ff; }
+    .job-pick-left .jp-num { font-weight: 800; color: var(--navy); font-size: 13.5px; }
+    .job-pick-left .jp-meta { font-size: 11.5px; color: #64748b; margin-top: 2px; }
+    .job-pick-right { text-align: right; }
+    .job-pick-right .jp-date { font-size: 10px; color: #94a3b8; margin-top: 4px; }
+
+    .status-tag { padding: 4px 9px; border-radius: 5px; font-size: 10.5px; font-weight: 800; color: white; display: inline-block; white-space: nowrap; }
+    .status-Pending { background: #ea580c; }
+    .status-PendingforQuotation { background: #f59e0b; }
+    .status-Ongoing { background: #2563eb; }
+    .status-WarrantyPending { background: #6366f1; }
+    .status-Completed { background: #059669; }
+    .status-Returned { background: #b91c1c; }
+    .status-CantRepair { background: #ef476f; }
+    .status-WarrantyClaimed { background: #7c3aed; }
+    .status-CustomerHold { background: #0891b2; }
+
+    /* Job detail header */
+    .detail-head { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 14px; }
+    .detail-head .dh-title { font-size: 15px; font-weight: 800; color: var(--navy); }
+    .detail-head .dh-sub { font-size: 12px; color: #64748b; margin-top: 2px; }
+    .detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px; }
+    .detail-grid .dg-item { background: #f8fafc; border: 1px solid #eef2f7; border-radius: 7px; padding: 8px 10px; }
+    .detail-grid .dg-label { font-size: 9.5px; font-weight: 700; text-transform: uppercase; color: #94a3b8; }
+    .detail-grid .dg-value { font-size: 12.5px; font-weight: 700; color: #1e293b; margin-top: 2px; }
+
+    /* Timeline */
+    .timeline { position: relative; margin-top: 6px; }
+    .tl-node { position: relative; padding-left: 24px; padding-bottom: 20px; }
+    .tl-node:last-child { padding-bottom: 0; }
+    .tl-node::before { content: ""; position: absolute; left: 5px; top: 4px; width: 10px; height: 10px; border-radius: 50%; background: var(--blue); border: 2px solid white; box-shadow: 0 0 0 2px var(--blue); }
+    .tl-node.tl-latest::before { background: var(--green); box-shadow: 0 0 0 2px var(--green); }
+    .tl-node::after { content: ""; position: absolute; left: 9px; top: 16px; bottom: 0; width: 2px; background: #e2e8f0; }
+    .tl-node:last-child::after { display: none; }
+    .tl-time { font-size: 10.5px; color: #94a3b8; font-weight: 600; margin-bottom: 3px; }
+    .tl-status { font-size: 13px; font-weight: 800; color: #1e293b; margin-bottom: 3px; }
+    .tl-notes { font-size: 12px; color: #475569; line-height: 1.45; }
+    .tl-imgs { display: flex; gap: 6px; margin-top: 6px; flex-wrap: wrap; }
+    .tl-thumb { width: 46px; height: 46px; object-fit: cover; border-radius: 5px; border: 1px solid #cbd5e1; cursor: pointer; background: #000; }
+
+    .empty-state { text-align: center; padding: 30px 10px; color: #94a3b8; font-size: 13px; }
+    .spinner { width: 26px; height: 26px; border: 3px solid #e2e8f0; border-top-color: var(--blue); border-radius: 50%; margin: 20px auto; animation: spin .7s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .lightbox { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.9); align-items: center; justify-content: center; z-index: 9999; padding: 20px; }
+    .lightbox.show { display: flex; }
+    .lightbox img { max-width: 100%; max-height: 100%; border-radius: 6px; }
+    .lightbox-close { position: absolute; top: 18px; right: 22px; color: white; font-size: 30px; cursor: pointer; }
+
+    .footer-note { text-align: center; font-size: 10.5px; color: #94a3b8; margin-top: 6px; padding-bottom: 20px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+    <div class="brand-header">
+        <p class="biz-name">SAP COMPUTERS(PVT)LTD</p>
+        <p class="biz-sub">Track your repair status anytime</p>
+    </div>
+
+    <!-- STEP 1: mobile number entry (skipped automatically if ?mobile= is in the URL) -->
+    <div class="card" id="mobileEntryCard" style="display:none;">
+        <h1 class="step-title">Check Your Repair Status</h1>
+        <p class="step-sub">Enter the mobile number you gave us when you dropped off your item.</p>
+        <label for="mobileInput">Mobile Number</label>
+        <input type="tel" id="mobileInput" placeholder="e.g. 0771234567" inputmode="numeric">
+        <button class="btn btn-primary" id="lookupBtn" onclick="lookupJobs()">View My Jobs</button>
+        <div class="msg" id="mobileMsg"></div>
+    </div>
+
+    <!-- STEP 2: job picker list -->
+    <div class="card" id="jobListCard" style="display:none;">
+        <h1 class="step-title">Your Repair Jobs</h1>
+        <p class="step-sub" id="jobListSub">Select a job to view its full status timeline.</p>
+        <div id="jobListContainer"></div>
+        <button class="btn btn-link" onclick="resetToMobileEntry()">↺ Use a different mobile number</button>
+    </div>
+
+    <!-- STEP 3: single job timeline -->
+    <div class="card" id="jobDetailCard" style="display:none;">
+        <button class="btn btn-link" id="backToListBtn" onclick="backToJobList()">← Back to my jobs</button>
+        <div class="detail-head">
+            <div>
+                <div class="dh-title" id="dhTitle">Job #</div>
+                <div class="dh-sub" id="dhSub"></div>
+            </div>
+            <span class="status-tag" id="dhStatusTag">—</span>
+        </div>
+        <div class="detail-grid" id="dhGrid"></div>
+        <div class="timeline" id="timelineContainer"></div>
+    </div>
+
+    <div id="loadingState" class="card" style="display:none;">
+        <div class="spinner"></div>
+        <p style="text-align:center; font-size:12px; color:#64748b;">Loading...</p>
+    </div>
+
+    <p class="footer-note">Having trouble? Call us on the number printed on your job card.</p>
+</div>
+
+<div class="lightbox" id="lightbox" onclick="closeLightbox()">
+    <span class="lightbox-close">&times;</span>
+    <img id="lightboxImg" src="">
+</div>
+
+<script>
+    // ── Configuration ────────────────────────────────────────────────────
+    // Same Apps Script Web App URL used by the Admin/Tech portals — this
+    // page only calls the two new read-only, mobile-scoped GET actions
+    // (getCustomerJobsByMobile / getCustomerJobStatus), it never writes.
+    const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzXj72GD_dE1zH46_OK28Xgo_Z0-sBeRK4BbgwJ2nAvWMgfvr4yXCregGKi86waUxUQ/exec";
+    // ─────────────────────────────────────────────────────────────────────
+
+    let currentMobile = null;
+    let currentJobsList = [];
+
+    function showOnly(id) {
+        ['mobileEntryCard', 'jobListCard', 'jobDetailCard', 'loadingState'].forEach(cid => {
+            document.getElementById(cid).style.display = (cid === id) ? 'block' : 'none';
+        });
+    }
+
+    function normalizeMobile(v) {
+        return (v || '').toString().trim();
+    }
+
+    function statusClass(status) {
+        return 'status-' + (status || '').toString().replace(/\s+/g, '');
+    }
+
+    // ── STEP 1 → STEP 2: look up all jobs for a mobile number ─────────────
+    function lookupJobs() {
+        const mobile = normalizeMobile(document.getElementById('mobileInput').value);
+        const msg = document.getElementById('mobileMsg');
+        if (!mobile) {
+            msg.style.display = 'block'; msg.className = 'msg error';
+            msg.innerText = 'Please enter your mobile number.';
+            return;
+        }
+        msg.style.display = 'none';
+        fetchJobsForMobile(mobile);
+    }
+
+    function fetchJobsForMobile(mobile) {
+        showOnly('loadingState');
+        fetch(`${WEB_APP_URL}?action=getCustomerJobsByMobile&mobile=${encodeURIComponent(mobile)}`)
+            .then(res => res.json())
+            .then(data => {
+                currentMobile = mobile;
+                if (data.success && data.jobs && data.jobs.length > 0) {
+                    currentJobsList = data.jobs;
+                    renderJobList();
+                } else {
+                    showOnly('mobileEntryCard');
+                    document.getElementById('mobileEntryCard').style.display = 'block';
+                    const msg = document.getElementById('mobileMsg');
+                    msg.style.display = 'block'; msg.className = 'msg error';
+                    msg.innerText = 'No jobs found for that mobile number. Please check and try again.';
+                }
+            })
+            .catch(() => {
+                showOnly('mobileEntryCard');
+                const msg = document.getElementById('mobileMsg');
+                msg.style.display = 'block'; msg.className = 'msg error';
+                msg.innerText = 'Could not reach the server. Please check your connection and try again.';
+            });
+    }
+
+    function renderJobList() {
+        const container = document.getElementById('jobListContainer');
+        if (currentJobsList.length === 0) {
+            container.innerHTML = '<div class="empty-state">No jobs found.</div>';
+        } else {
+            container.innerHTML = currentJobsList.map(job => `
+                <div class="job-pick-item" onclick="openJob(${job.jobNum})">
+                    <div class="job-pick-left">
+                        <div class="jp-num">Job #${job.jobNum}</div>
+                        <div class="jp-meta">${escHtml(job.itemType || '')}${job.model ? ' — ' + escHtml(job.model) : ''}</div>
+                    </div>
+                    <div class="job-pick-right">
+                        <span class="status-tag ${statusClass(job.status)}">${escHtml(job.status || '')}</span>
+                        <div class="jp-date">${escHtml(job.createdTime || '')}</div>
+                    </div>
+                </div>
+            `).join('');
+        }
+        document.getElementById('jobListSub').innerText = currentJobsList.length === 1
+            ? 'You have 1 job on file. Tap it to view the full status timeline.'
+            : `You have ${currentJobsList.length} jobs on file. Select one to view its status timeline.`;
+        showOnly('jobListCard');
+    }
+
+    function resetToMobileEntry() {
+        currentMobile = null; currentJobsList = [];
+        document.getElementById('mobileInput').value = '';
+        document.getElementById('mobileMsg').style.display = 'none';
+        showOnly('mobileEntryCard');
+    }
+
+    function backToJobList() {
+        renderJobList();
+    }
+
+    // ── STEP 2 → STEP 3: open a single job's full timeline ────────────────
+    function openJob(jobNum) {
+        showOnly('loadingState');
+        fetch(`${WEB_APP_URL}?action=getCustomerJobStatus&jobNum=${encodeURIComponent(jobNum)}&mobile=${encodeURIComponent(currentMobile)}`)
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    renderJobDetail(data.job, data.history);
+                } else {
+                    showOnly('jobListCard');
+                    alert(data.error || 'Could not load that job.');
+                }
+            })
+            .catch(() => {
+                showOnly('jobListCard');
+                alert('Could not reach the server. Please try again.');
+            });
+    }
+
+    function renderJobDetail(job, history) {
+        document.getElementById('dhTitle').innerText = `Job #${job.jobNum}`;
+        document.getElementById('dhSub').innerText = `${job.itemType || ''}${job.model ? ' — ' + job.model : ''}`;
+        const tag = document.getElementById('dhStatusTag');
+        tag.className = 'status-tag ' + statusClass(job.status);
+        tag.innerText = job.status || '—';
+
+        const gridItems = [
+            { label: 'Registered On', value: job.createdTime || '—' },
+            { label: 'Serial Number', value: job.serial || '—' },
+            { label: 'Repair Estimate', value: job.estimatePrice ? ('Rs. ' + job.estimatePrice) : 'To be advised' },
+            { label: 'Final Price', value: job.totalPrice ? ('Rs. ' + job.totalPrice) : 'Pending' }
+        ];
+        document.getElementById('dhGrid').innerHTML = gridItems.map(g => `
+            <div class="dg-item"><div class="dg-label">${escHtml(g.label)}</div><div class="dg-value">${escHtml(g.value.toString())}</div></div>
+        `).join('');
+
+        const tlContainer = document.getElementById('timelineContainer');
+        if (!history || history.length === 0) {
+            tlContainer.innerHTML = '<div class="empty-state">No status updates logged yet.</div>';
+        } else {
+            tlContainer.innerHTML = history.map((h, idx) => `
+                <div class="tl-node ${idx === 0 ? 'tl-latest' : ''}">
+                    <div class="tl-time">${escHtml(h.timestamp || '')}</div>
+                    <div class="tl-status">${escHtml(h.status || '')}</div>
+                    ${h.notes ? `<div class="tl-notes">${escHtml(h.notes)}</div>` : ''}
+                    ${h.images && h.images.length ? `<div class="tl-imgs">${h.images.map(src => `<img class="tl-thumb" src="${src}" onclick="event.stopPropagation(); openLightbox('${src}')">`).join('')}</div>` : ''}
+                </div>
+            `).join('');
+        }
+
+        showOnly('jobDetailCard');
+    }
+
+    function escHtml(s) {
+        return (s || '').toString().replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    }
+
+    function openLightbox(src) {
+        document.getElementById('lightboxImg').src = src;
+        document.getElementById('lightbox').classList.add('show');
+    }
+    function closeLightbox() {
+        document.getElementById('lightbox').classList.remove('show');
+    }
+
+    // ── Entry point: read ?mobile= and ?job= from the QR link ─────────────
+    document.addEventListener('DOMContentLoaded', function () {
+        const params = new URLSearchParams(window.location.search);
+        const urlMobile = normalizeMobile(params.get('mobile'));
+        const urlJob = params.get('job');
+
+        if (urlMobile) {
+            currentMobile = urlMobile;
+            showOnly('loadingState');
+            fetch(`${WEB_APP_URL}?action=getCustomerJobsByMobile&mobile=${encodeURIComponent(urlMobile)}`)
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success && data.jobs && data.jobs.length > 0) {
+                        currentJobsList = data.jobs;
+                        if (urlJob && currentJobsList.some(j => j.jobNum == urlJob)) {
+                            openJob(urlJob);
+                        } else {
+                            renderJobList();
+                        }
+                    } else {
+                        showOnly('mobileEntryCard');
+                        document.getElementById('mobileEntryCard').style.display = 'block';
+                    }
+                })
+                .catch(() => { showOnly('mobileEntryCard'); });
+        } else {
+            showOnly('mobileEntryCard');
+        }
+    });
+</script>
+</body>
+</html>
