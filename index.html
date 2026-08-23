@@ -294,7 +294,6 @@
                 <div class="tl-node ${idx === 0 ? 'tl-latest' : ''}">
                     <div class="tl-time">${escHtml(h.timestamp || '')}</div>
                     <div class="tl-status">${escHtml(h.status || '')}</div>
-                    ${h.notes ? `<div class="tl-notes">${escHtml(h.notes)}</div>` : ''}
                     ${h.images && h.images.length ? `<div class="tl-imgs">${h.images.map(src => `<img class="tl-thumb" src="${src}" onclick="event.stopPropagation(); openLightbox('${src}')">`).join('')}</div>` : ''}
                 </div>
             `).join('');
