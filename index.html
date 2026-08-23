@@ -9,13 +9,21 @@
         --navy: #1e3a8a;
         --navy-dark: #1e293b;
         --blue: #2563eb;
+        --blue-light: #60a5fa;
         --green: #059669;
-        --bg: #f1f5f9;
+        --amber: #f59e0b;
+        --bg: #eef2f9;
+        --card-radius: 14px;
     }
     * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
     body {
         font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        background: var(--bg);
+        background:
+            radial-gradient(circle at 12% 8%, rgba(37,99,235,0.07) 0%, transparent 38%),
+            radial-gradient(circle at 90% 92%, rgba(5,150,105,0.06) 0%, transparent 40%),
+            var(--bg);
+        background-attachment: fixed;
         margin: 0;
         padding: 16px;
         color: var(--navy-dark);
@@ -23,31 +31,88 @@
     }
     .wrap { max-width: 480px; margin: 0 auto; }
 
-    .brand-header { text-align: center; margin-bottom: 18px; padding-top: 6px; }
-    .brand-header .biz-name { font-size: 18px; font-weight: 800; color: var(--navy); margin: 0; }
-    .brand-header .biz-sub { font-size: 12px; color: #64748b; margin-top: 2px; }
+    /* ── Brand header with a faint circuit-trace motif + a live "signal" LED ── */
+    .brand-header { position: relative; text-align: center; margin-bottom: 18px; padding: 18px 10px 14px; overflow: hidden; }
+    .brand-header::before {
+        content: "";
+        position: absolute; inset: 0;
+        background-image:
+            linear-gradient(90deg, transparent 49%, rgba(37,99,235,0.09) 49%, rgba(37,99,235,0.09) 51%, transparent 51%),
+            linear-gradient(0deg, transparent 49%, rgba(37,99,235,0.09) 49%, rgba(37,99,235,0.09) 51%, transparent 51%);
+        background-size: 34px 34px;
+        -webkit-mask-image: radial-gradient(ellipse at center, black 0%, transparent 75%);
+        mask-image: radial-gradient(ellipse at center, black 0%, transparent 75%);
+        pointer-events: none;
+    }
+    .brand-header .biz-name { position: relative; font-size: 19px; font-weight: 800; color: var(--navy); margin: 0; letter-spacing: 0.2px; }
+    .brand-header .biz-sub { position: relative; font-size: 12px; color: #64748b; margin-top: 3px; display: inline-flex; align-items: center; gap: 6px; }
+    .live-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--green); box-shadow: 0 0 0 0 rgba(5,150,105,0.6); animation: livePulse 2.2s infinite; flex-shrink: 0; }
+    @keyframes livePulse {
+        0% { box-shadow: 0 0 0 0 rgba(5,150,105,0.55); }
+        70% { box-shadow: 0 0 0 6px rgba(5,150,105,0); }
+        100% { box-shadow: 0 0 0 0 rgba(5,150,105,0); }
+    }
 
-    .card { background: white; border-radius: 12px; padding: 20px; box-shadow: 0 4px 14px rgba(0,0,0,0.06); border: 1px solid #e2e8f0; margin-bottom: 16px; }
+    .card {
+        background: white; border-radius: var(--card-radius); padding: 20px;
+        box-shadow: 0 4px 18px rgba(15,23,42,0.07); border: 1px solid #e2e8f0; margin-bottom: 16px;
+        animation: cardIn .38s cubic-bezier(.22,.61,.36,1) both;
+    }
+    @keyframes cardIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    @media (prefers-reduced-motion: reduce) {
+        .card, .tl-node, .job-pick-item { animation: none !important; }
+        .live-dot, .status-Ongoing, .gear { animation: none !important; }
+    }
 
+    .card-head-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 4px; }
     h1.step-title { font-size: 16px; margin: 0 0 4px 0; color: var(--navy); }
     p.step-sub { font-size: 12.5px; color: #64748b; margin: 0 0 16px 0; line-height: 1.5; }
 
     label { font-size: 11px; font-weight: 700; text-transform: uppercase; color: #475569; display: block; margin-bottom: 5px; }
-    input[type=tel] { width: 100%; padding: 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 16px; background: #f8fafc; }
-    input[type=tel]:focus { outline: 2px solid var(--blue); background: white; }
+    input[type=tel] { width: 100%; padding: 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 16px; background: #f8fafc; transition: border-color .15s, box-shadow .15s; }
+    input[type=tel]:focus { outline: none; border-color: var(--blue); box-shadow: 0 0 0 3px rgba(37,99,235,0.13); background: white; }
+    input[type=tel].input-error { border-color: #b91c1c; box-shadow: 0 0 0 3px rgba(185,28,28,0.1); }
 
-    .btn { display: block; width: 100%; padding: 13px; border: none; border-radius: 8px; font-weight: 700; font-size: 14px; cursor: pointer; margin-top: 14px; }
-    .btn-primary { background: var(--navy); color: white; }
-    .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; }
+    .btn { display: block; width: 100%; padding: 13px; border: none; border-radius: 8px; font-weight: 700; font-size: 14px; cursor: pointer; margin-top: 14px; transition: transform .12s, box-shadow .12s, opacity .12s; }
+    .btn-primary { background: var(--navy); color: white; box-shadow: 0 3px 10px rgba(30,58,138,0.25); }
+    .btn-primary:hover { box-shadow: 0 5px 14px rgba(30,58,138,0.32); }
+    .btn-primary:active { transform: scale(0.98); }
+    .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; transform: none; box-shadow: none; }
     .btn-link { background: none; color: var(--blue); font-weight: 700; font-size: 12.5px; padding: 8px 0; margin: 0; text-align: left; width: auto; }
+    .btn-link:hover { text-decoration: underline; }
 
-    .msg { font-size: 12.5px; font-weight: 600; margin-top: 10px; display: none; }
+    /* Refresh button (icon button, top-right of a card) */
+    .refresh-btn {
+        display: inline-flex; align-items: center; gap: 5px; background: #eff6ff; color: var(--blue);
+        border: 1px solid #dbeafe; border-radius: 20px; font-size: 11px; font-weight: 700;
+        padding: 6px 11px; cursor: pointer; white-space: nowrap; transition: background .15s, transform .12s;
+        flex-shrink: 0;
+    }
+    .refresh-btn:hover { background: #dbeafe; }
+    .refresh-btn:active { transform: scale(0.96); }
+    .refresh-btn svg { width: 13px; height: 13px; transition: transform .5s ease; }
+    .refresh-btn.spinning svg { animation: spin .8s linear infinite; }
+    .refresh-btn:disabled { opacity: 0.55; cursor: not-allowed; }
+
+    .last-updated { font-size: 10.5px; color: #94a3b8; margin: -10px 0 14px 0; display: flex; align-items: center; gap: 4px; }
+
+    .msg { font-size: 12.5px; font-weight: 600; margin-top: 10px; display: none; align-items: center; gap: 6px; }
     .msg.error { color: #b91c1c; }
     .msg.info { color: #475569; }
 
     /* Job picker list */
-    .job-pick-item { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 13px 14px; border: 1px solid #e2e8f0; border-radius: 9px; margin-bottom: 10px; cursor: pointer; background: #f8fafc; transition: border-color .15s, background .15s; }
-    .job-pick-item:hover, .job-pick-item:active { border-color: var(--blue); background: #eff6ff; }
+    .job-pick-item {
+        display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 13px 14px;
+        border: 1px solid #e2e8f0; border-radius: 9px; margin-bottom: 10px; cursor: pointer; background: #f8fafc;
+        transition: border-color .15s, background .15s, transform .12s;
+        animation: itemIn .32s cubic-bezier(.22,.61,.36,1) both;
+    }
+    @keyframes itemIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+    .job-pick-item:hover { border-color: var(--blue); background: #eff6ff; }
+    .job-pick-item:active { transform: scale(0.99); }
     .job-pick-left .jp-num { font-weight: 800; color: var(--navy); font-size: 13.5px; }
     .job-pick-left .jp-meta { font-size: 11.5px; color: #64748b; margin-top: 2px; }
     .job-pick-right { text-align: right; }
@@ -56,18 +121,33 @@
     .status-tag { padding: 4px 9px; border-radius: 5px; font-size: 10.5px; font-weight: 800; color: white; display: inline-block; white-space: nowrap; }
     .status-Pending { background: #ea580c; }
     .status-PendingforQuotation { background: #f59e0b; }
-    .status-Ongoing { background: #2563eb; }
+    .status-Ongoing { background: #2563eb; animation: ongoingGlow 2.4s infinite; }
     .status-WarrantyPending { background: #6366f1; }
     .status-Completed { background: #059669; }
     .status-Returned { background: #b91c1c; }
     .status-CantRepair { background: #ef476f; }
     .status-WarrantyClaimed { background: #7c3aed; }
     .status-CustomerHold { background: #0891b2; }
+    @keyframes ongoingGlow {
+        0%, 100% { box-shadow: 0 0 0 0 rgba(37,99,235,0.4); }
+        50% { box-shadow: 0 0 0 4px rgba(37,99,235,0); }
+    }
+
+    /* Status legend */
+    .legend-toggle { display: inline-flex; align-items: center; gap: 4px; font-size: 11.5px; font-weight: 700; color: var(--blue); background: none; border: none; cursor: pointer; padding: 4px 0; }
+    .legend-toggle svg { width: 11px; height: 11px; transition: transform .2s; }
+    .legend-toggle.open svg { transform: rotate(180deg); }
+    .legend-panel { max-height: 0; overflow: hidden; transition: max-height .3s ease; }
+    .legend-panel.open { max-height: 400px; }
+    .legend-grid { display: grid; grid-template-columns: 1fr; gap: 8px; padding: 12px 2px 2px; }
+    .legend-row { display: flex; align-items: center; gap: 8px; font-size: 11.5px; color: #475569; }
+    .legend-dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
 
     /* Job detail header */
-    .detail-head { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 14px; }
+    .detail-head { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px; gap: 10px; }
     .detail-head .dh-title { font-size: 15px; font-weight: 800; color: var(--navy); }
     .detail-head .dh-sub { font-size: 12px; color: #64748b; margin-top: 2px; }
+    .detail-topbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
     .detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px; }
     .detail-grid .dg-item { background: #f8fafc; border: 1px solid #eef2f7; border-radius: 7px; padding: 8px 10px; }
     .detail-grid .dg-label { font-size: 9.5px; font-weight: 700; text-transform: uppercase; color: #94a3b8; }
@@ -75,28 +155,55 @@
 
     /* Timeline */
     .timeline { position: relative; margin-top: 6px; }
-    .tl-node { position: relative; padding-left: 24px; padding-bottom: 20px; }
+    .tl-node {
+        position: relative; padding-left: 24px; padding-bottom: 20px;
+        animation: itemIn .35s cubic-bezier(.22,.61,.36,1) both;
+    }
     .tl-node:last-child { padding-bottom: 0; }
     .tl-node::before { content: ""; position: absolute; left: 5px; top: 4px; width: 10px; height: 10px; border-radius: 50%; background: var(--blue); border: 2px solid white; box-shadow: 0 0 0 2px var(--blue); }
-    .tl-node.tl-latest::before { background: var(--green); box-shadow: 0 0 0 2px var(--green); }
+    .tl-node.tl-latest::before { background: var(--green); box-shadow: 0 0 0 2px var(--green); animation: livePulse 2.2s infinite; }
     .tl-node::after { content: ""; position: absolute; left: 9px; top: 16px; bottom: 0; width: 2px; background: #e2e8f0; }
     .tl-node:last-child::after { display: none; }
     .tl-time { font-size: 10.5px; color: #94a3b8; font-weight: 600; margin-bottom: 3px; }
     .tl-status { font-size: 13px; font-weight: 800; color: #1e293b; margin-bottom: 3px; }
-    .tl-notes { font-size: 12px; color: #475569; line-height: 1.45; }
     .tl-imgs { display: flex; gap: 6px; margin-top: 6px; flex-wrap: wrap; }
-    .tl-thumb { width: 46px; height: 46px; object-fit: cover; border-radius: 5px; border: 1px solid #cbd5e1; cursor: pointer; background: #000; }
+    .tl-thumb { width: 46px; height: 46px; object-fit: cover; border-radius: 5px; border: 1px solid #cbd5e1; cursor: pointer; background: #000; transition: transform .15s; }
+    .tl-thumb:hover { transform: scale(1.06); }
 
     .empty-state { text-align: center; padding: 30px 10px; color: #94a3b8; font-size: 13px; }
-    .spinner { width: 26px; height: 26px; border: 3px solid #e2e8f0; border-top-color: var(--blue); border-radius: 50%; margin: 20px auto; animation: spin .7s linear infinite; }
+
+    /* Repair-themed gear loader */
+    .loader-wrap { display: flex; flex-direction: column; align-items: center; padding: 12px 0 4px; }
+    .gear { width: 40px; height: 40px; animation: spin 1.4s linear infinite; }
     @keyframes spin { to { transform: rotate(360deg); } }
+    .loader-text { text-align: center; font-size: 12px; color: #64748b; margin-top: 10px; }
 
     .lightbox { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.9); align-items: center; justify-content: center; z-index: 9999; padding: 20px; }
     .lightbox.show { display: flex; }
     .lightbox img { max-width: 100%; max-height: 100%; border-radius: 6px; }
     .lightbox-close { position: absolute; top: 18px; right: 22px; color: white; font-size: 30px; cursor: pointer; }
 
-    .footer-note { text-align: center; font-size: 10.5px; color: #94a3b8; margin-top: 6px; padding-bottom: 20px; }
+    /* Contact bar */
+    .contact-bar {
+        display: flex; align-items: center; justify-content: center; gap: 8px;
+        background: white; border: 1px solid #e2e8f0; border-radius: 10px;
+        padding: 12px 14px; margin-top: 4px; font-size: 12px; color: #475569;
+        text-decoration: none; transition: border-color .15s, background .15s;
+    }
+    .contact-bar:hover { border-color: var(--blue); background: #f8fbff; }
+    .contact-bar svg { width: 15px; height: 15px; color: var(--blue); flex-shrink: 0; }
+    .footer-note { text-align: center; font-size: 10.5px; color: #94a3b8; margin-top: 10px; padding-bottom: 10px; }
+
+    /* Toast */
+    #toast {
+        position: fixed; left: 50%; bottom: 22px; transform: translateX(-50%) translateY(20px);
+        background: var(--navy-dark); color: white; font-size: 12.5px; font-weight: 600;
+        padding: 10px 18px; border-radius: 24px; box-shadow: 0 6px 20px rgba(0,0,0,0.25);
+        opacity: 0; pointer-events: none; transition: opacity .25s, transform .25s; z-index: 10000;
+        display: flex; align-items: center; gap: 7px; max-width: 90%;
+    }
+    #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+    #toast.error { background: #b91c1c; }
 </style>
 </head>
 <body>
@@ -104,7 +211,7 @@
 
     <div class="brand-header">
         <p class="biz-name">SAP COMPUTERS(PVT)LTD</p>
-        <p class="biz-sub">Track your repair status anytime</p>
+        <p class="biz-sub"><span class="live-dot"></span>Track your repair status anytime</p>
     </div>
 
     <!-- STEP 1: mobile number entry (skipped automatically if ?mobile= is in the URL) -->
@@ -112,14 +219,21 @@
         <h1 class="step-title">Check Your Repair Status</h1>
         <p class="step-sub">Enter the mobile number you gave us when you dropped off your item.</p>
         <label for="mobileInput">Mobile Number</label>
-        <input type="tel" id="mobileInput" placeholder="e.g. 0771234567" inputmode="numeric">
+        <input type="tel" id="mobileInput" placeholder="e.g. 0771234567" inputmode="numeric" maxlength="15">
         <button class="btn btn-primary" id="lookupBtn" onclick="lookupJobs()">View My Jobs</button>
         <div class="msg" id="mobileMsg"></div>
     </div>
 
     <!-- STEP 2: job picker list -->
     <div class="card" id="jobListCard" style="display:none;">
-        <h1 class="step-title">Your Repair Jobs</h1>
+        <div class="card-head-row">
+            <h1 class="step-title" style="margin-bottom:0;">Your Repair Jobs</h1>
+            <button class="refresh-btn" id="listRefreshBtn" onclick="refreshJobList()">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M21 12a9 9 0 1 1-2.64-6.36M21 4v6h-6"/></svg>
+                Refresh
+            </button>
+        </div>
+        <div class="last-updated" id="listUpdated"></div>
         <p class="step-sub" id="jobListSub">Select a job to view its full status timeline.</p>
         <div id="jobListContainer"></div>
         <button class="btn btn-link" onclick="resetToMobileEntry()">↺ Use a different mobile number</button>
@@ -127,7 +241,13 @@
 
     <!-- STEP 3: single job timeline -->
     <div class="card" id="jobDetailCard" style="display:none;">
-        <button class="btn btn-link" id="backToListBtn" onclick="backToJobList()">← Back to my jobs</button>
+        <div class="detail-topbar">
+            <button class="btn btn-link" id="backToListBtn" onclick="backToJobList()" style="margin:0;">← Back to my jobs</button>
+            <button class="refresh-btn" id="detailRefreshBtn" onclick="refreshJobDetail()">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M21 12a9 9 0 1 1-2.64-6.36M21 4v6h-6"/></svg>
+                Refresh
+            </button>
+        </div>
         <div class="detail-head">
             <div>
                 <div class="dh-title" id="dhTitle">Job #</div>
@@ -135,16 +255,34 @@
             </div>
             <span class="status-tag" id="dhStatusTag">—</span>
         </div>
+        <div class="last-updated" id="detailUpdated"></div>
         <div class="detail-grid" id="dhGrid"></div>
-        <div class="timeline" id="timelineContainer"></div>
+
+        <button class="legend-toggle" id="legendToggle" onclick="toggleLegend()">
+            What do these statuses mean?
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M6 9l6 6 6-6"/></svg>
+        </button>
+        <div class="legend-panel" id="legendPanel">
+            <div class="legend-grid" id="legendGrid"></div>
+        </div>
+
+        <div class="timeline" id="timelineContainer" style="margin-top:16px;"></div>
     </div>
 
     <div id="loadingState" class="card" style="display:none;">
-        <div class="spinner"></div>
-        <p style="text-align:center; font-size:12px; color:#64748b;">Loading...</p>
+        <div class="loader-wrap">
+            <svg class="gear" viewBox="0 0 24 24" fill="none">
+                <path fill="#2563eb" d="M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8zm9.4 5.6l-1.7 1a7.9 7.9 0 0 1-1 1.7l.5 1.9-1.7 1-1.4-1.4a7.7 7.7 0 0 1-2 .5l-1 1.7h-2l-1-1.7a7.7 7.7 0 0 1-2-.5l-1.4 1.4-1.7-1 .5-1.9a7.9 7.9 0 0 1-1-1.7l-1.9-.5v-2l1.9-.5a7.9 7.9 0 0 1 1-1.7l-.5-1.9 1.7-1 1.4 1.4a7.7 7.7 0 0 1 2-.5l1-1.7h2l1 1.7a7.7 7.7 0 0 1 2 .5l1.4-1.4 1.7 1-.5 1.9a7.9 7.9 0 0 1 1 1.7l1.7.5v2z"/>
+            </svg>
+            <p class="loader-text">Loading your repair details…</p>
+        </div>
     </div>
 
-    <p class="footer-note">Having trouble? Call us on the number printed on your job card.</p>
+    <a class="contact-bar" id="contactBar" href="#">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.362 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.338 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+        <span id="contactText">Having trouble? Call us on the number printed on your job card.</span>
+    </a>
+    <p class="footer-note">SAP Computers (Pvt) Ltd &middot; We'll never ask for payment over the phone.</p>
 </div>
 
 <div class="lightbox" id="lightbox" onclick="closeLightbox()">
@@ -152,16 +290,39 @@
     <img id="lightboxImg" src="">
 </div>
 
+<div id="toast"></div>
+
 <script>
     // ── Configuration ────────────────────────────────────────────────────
     // Same Apps Script Web App URL used by the Admin/Tech portals — this
     // page only calls the two new read-only, mobile-scoped GET actions
     // (getCustomerJobsByMobile / getCustomerJobStatus), it never writes.
     const WEB_APP_URL = "https://zrfdavacsndjspyhhfej.supabase.co/functions/v1/shop-api";
+    // Set this to the shop's phone number (digits only, e.g. "0771234567")
+    // to turn the footer contact bar into a tappable call button.
+    const SHOP_PHONE = "";
     // ─────────────────────────────────────────────────────────────────────
 
     let currentMobile = null;
     let currentJobsList = [];
+    let currentOpenJobNum = null;
+
+    const STATUS_INFO = {
+        'Pending':               { label: 'Pending',               desc: 'Received and waiting to be inspected.' },
+        'PendingforQuotation':   { label: 'Pending for Quotation',  desc: 'Diagnosed — a price estimate is being prepared.' },
+        'Ongoing':               { label: 'Ongoing',                desc: 'Repair work is actively in progress.' },
+        'WarrantyPending':       { label: 'Warranty Pending',       desc: 'Being processed under a warranty claim.' },
+        'Completed':             { label: 'Completed',              desc: 'Repair finished — ready for collection.' },
+        'Returned':              { label: 'Returned',               desc: 'Item has been returned to the customer.' },
+        'CantRepair':            { label: "Can't Repair",           desc: 'Unable to repair — please contact us for details.' },
+        'WarrantyClaimed':       { label: 'Warranty Claimed',       desc: 'Warranty claim has been submitted/approved.' },
+        'CustomerHold':          { label: 'Customer Hold',          desc: 'Paused, awaiting your confirmation or reply.' }
+    };
+
+    if (SHOP_PHONE) {
+        document.getElementById('contactBar').href = 'tel:' + SHOP_PHONE;
+        document.getElementById('contactText').innerText = `Having trouble? Call us at ${SHOP_PHONE}`;
+    }
 
     function showOnly(id) {
         ['mobileEntryCard', 'jobListCard', 'jobDetailCard', 'loadingState'].forEach(cid => {
@@ -177,42 +338,80 @@
         return 'status-' + (status || '').toString().replace(/\s+/g, '');
     }
 
+    function showToast(text, isError) {
+        const t = document.getElementById('toast');
+        t.innerText = text;
+        t.className = isError ? 'error show' : 'show';
+        clearTimeout(showToast._tm);
+        showToast._tm = setTimeout(() => { t.className = t.className.replace('show', ''); }, 2600);
+    }
+
+    function formatRelativeNow() {
+        return 'Updated just now';
+    }
+
     // ── STEP 1 → STEP 2: look up all jobs for a mobile number ─────────────
     function lookupJobs() {
-        const mobile = normalizeMobile(document.getElementById('mobileInput').value);
+        const input = document.getElementById('mobileInput');
+        const mobile = normalizeMobile(input.value);
         const msg = document.getElementById('mobileMsg');
+        const digits = mobile.replace(/\D/g, '');
+
         if (!mobile) {
-            msg.style.display = 'block'; msg.className = 'msg error';
+            input.classList.add('input-error');
+            msg.style.display = 'flex'; msg.className = 'msg error';
             msg.innerText = 'Please enter your mobile number.';
             return;
         }
+        if (digits.length < 9 || digits.length > 12) {
+            input.classList.add('input-error');
+            msg.style.display = 'flex'; msg.className = 'msg error';
+            msg.innerText = 'Please enter a valid mobile number (e.g. 0771234567).';
+            return;
+        }
+        input.classList.remove('input-error');
         msg.style.display = 'none';
         fetchJobsForMobile(mobile);
     }
 
-    function fetchJobsForMobile(mobile) {
-        showOnly('loadingState');
-        fetch(`${WEB_APP_URL}?action=getCustomerJobsByMobile&mobile=${encodeURIComponent(mobile)}`)
+    function fetchJobsForMobile(mobile, opts) {
+        opts = opts || {};
+        if (!opts.silent) showOnly('loadingState');
+        return fetch(`${WEB_APP_URL}?action=getCustomerJobsByMobile&mobile=${encodeURIComponent(mobile)}`)
             .then(res => res.json())
             .then(data => {
                 currentMobile = mobile;
                 if (data.success && data.jobs && data.jobs.length > 0) {
                     currentJobsList = data.jobs;
                     renderJobList();
+                    document.getElementById('listUpdated').innerText = formatRelativeNow();
+                    if (opts.silent) showToast('Job list updated');
                 } else {
                     showOnly('mobileEntryCard');
                     document.getElementById('mobileEntryCard').style.display = 'block';
                     const msg = document.getElementById('mobileMsg');
-                    msg.style.display = 'block'; msg.className = 'msg error';
+                    msg.style.display = 'flex'; msg.className = 'msg error';
                     msg.innerText = 'No jobs found for that mobile number. Please check and try again.';
                 }
             })
             .catch(() => {
-                showOnly('mobileEntryCard');
-                const msg = document.getElementById('mobileMsg');
-                msg.style.display = 'block'; msg.className = 'msg error';
-                msg.innerText = 'Could not reach the server. Please check your connection and try again.';
+                if (opts.silent) {
+                    showToast('Could not refresh. Check your connection.', true);
+                } else {
+                    showOnly('mobileEntryCard');
+                    const msg = document.getElementById('mobileMsg');
+                    msg.style.display = 'flex'; msg.className = 'msg error';
+                    msg.innerText = 'Could not reach the server. Please check your connection and try again.';
+                }
             });
+    }
+
+    function refreshJobList() {
+        const btn = document.getElementById('listRefreshBtn');
+        btn.classList.add('spinning'); btn.disabled = true;
+        fetchJobsForMobile(currentMobile, { silent: true }).finally(() => {
+            btn.classList.remove('spinning'); btn.disabled = false;
+        });
     }
 
     function renderJobList() {
@@ -220,8 +419,8 @@
         if (currentJobsList.length === 0) {
             container.innerHTML = '<div class="empty-state">No jobs found.</div>';
         } else {
-            container.innerHTML = currentJobsList.map(job => `
-                <div class="job-pick-item" onclick="openJob(${job.jobNum})">
+            container.innerHTML = currentJobsList.map((job, i) => `
+                <div class="job-pick-item" style="animation-delay:${i * 45}ms" onclick="openJob(${job.jobNum})">
                     <div class="job-pick-left">
                         <div class="jp-num">Job #${job.jobNum}</div>
                         <div class="jp-meta">${escHtml(job.itemType || '')}${job.model ? ' — ' + escHtml(job.model) : ''}</div>
@@ -242,6 +441,7 @@
     function resetToMobileEntry() {
         currentMobile = null; currentJobsList = [];
         document.getElementById('mobileInput').value = '';
+        document.getElementById('mobileInput').classList.remove('input-error');
         document.getElementById('mobileMsg').style.display = 'none';
         showOnly('mobileEntryCard');
     }
@@ -251,23 +451,62 @@
     }
 
     // ── STEP 2 → STEP 3: open a single job's full timeline ────────────────
-    function openJob(jobNum) {
-        showOnly('loadingState');
-        fetch(`${WEB_APP_URL}?action=getCustomerJobStatus&jobNum=${encodeURIComponent(jobNum)}&mobile=${encodeURIComponent(currentMobile)}`)
+    function openJob(jobNum, opts) {
+        opts = opts || {};
+        currentOpenJobNum = jobNum;
+        if (!opts.silent) showOnly('loadingState');
+        return fetch(`${WEB_APP_URL}?action=getCustomerJobStatus&jobNum=${encodeURIComponent(jobNum)}&mobile=${encodeURIComponent(currentMobile)}`)
             .then(res => res.json())
             .then(data => {
                 if (data.success) {
                     renderJobDetail(data.job, data.history);
+                    document.getElementById('detailUpdated').innerText = formatRelativeNow();
+                    if (opts.silent) showToast('Status updated');
                 } else {
-                    showOnly('jobListCard');
-                    alert(data.error || 'Could not load that job.');
+                    if (opts.silent) {
+                        showToast(data.error || 'Could not refresh this job.', true);
+                    } else {
+                        showOnly('jobListCard');
+                        showToast(data.error || 'Could not load that job.', true);
+                    }
                 }
             })
             .catch(() => {
-                showOnly('jobListCard');
-                alert('Could not reach the server. Please try again.');
+                if (opts.silent) {
+                    showToast('Could not reach the server.', true);
+                } else {
+                    showOnly('jobListCard');
+                    showToast('Could not reach the server. Please try again.', true);
+                }
             });
     }
+
+    function refreshJobDetail() {
+        if (!currentOpenJobNum) return;
+        const btn = document.getElementById('detailRefreshBtn');
+        btn.classList.add('spinning'); btn.disabled = true;
+        openJob(currentOpenJobNum, { silent: true }).finally(() => {
+            btn.classList.remove('spinning'); btn.disabled = false;
+        });
+    }
+
+    function toggleLegend() {
+        const panel = document.getElementById('legendPanel');
+        const toggle = document.getElementById('legendToggle');
+        panel.classList.toggle('open');
+        toggle.classList.toggle('open');
+    }
+
+    function renderLegend() {
+        const grid = document.getElementById('legendGrid');
+        grid.innerHTML = Object.keys(STATUS_INFO).map(key => `
+            <div class="legend-row">
+                <span class="legend-dot status-${key}" style="animation:none;"></span>
+                <span><strong>${escHtml(STATUS_INFO[key].label)}</strong> — ${escHtml(STATUS_INFO[key].desc)}</span>
+            </div>
+        `).join('');
+    }
+    renderLegend();
 
     function renderJobDetail(job, history) {
         document.getElementById('dhTitle').innerText = `Job #${job.jobNum}`;
@@ -286,15 +525,19 @@
             <div class="dg-item"><div class="dg-label">${escHtml(g.label)}</div><div class="dg-value">${escHtml(g.value.toString())}</div></div>
         `).join('');
 
+        // collapse legend on fresh render
+        document.getElementById('legendPanel').classList.remove('open');
+        document.getElementById('legendToggle').classList.remove('open');
+
         const tlContainer = document.getElementById('timelineContainer');
         if (!history || history.length === 0) {
             tlContainer.innerHTML = '<div class="empty-state">No status updates logged yet.</div>';
         } else {
             tlContainer.innerHTML = history.map((h, idx) => `
-                <div class="tl-node ${idx === 0 ? 'tl-latest' : ''}">
+                <div class="tl-node ${idx === 0 ? 'tl-latest' : ''}" style="animation-delay:${idx * 60}ms">
                     <div class="tl-time">${escHtml(h.timestamp || '')}</div>
                     <div class="tl-status">${escHtml(h.status || '')}</div>
-                    ${h.images && h.images.length ? `<div class="tl-imgs">${h.images.map(src => `<img class="tl-thumb" src="${src}" onclick="event.stopPropagation(); openLightbox('${src}')">`).join('')}</div>` : ''}
+                    ${h.images && h.images.length ? `<div class="tl-imgs">${h.images.map(src => `<img class="tl-thumb" src="${escHtml(src)}" onclick="event.stopPropagation(); openLightbox('${escHtml(src)}')">`).join('')}</div>` : ''}
                 </div>
             `).join('');
         }
@@ -303,7 +546,7 @@
     }
 
     function escHtml(s) {
-        return (s || '').toString().replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+        return (s || '').toString().replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
     }
 
     function openLightbox(src) {
@@ -328,6 +571,7 @@
                 .then(data => {
                     if (data.success && data.jobs && data.jobs.length > 0) {
                         currentJobsList = data.jobs;
+                        document.getElementById('listUpdated').innerText = formatRelativeNow();
                         if (urlJob && currentJobsList.some(j => j.jobNum == urlJob)) {
                             openJob(urlJob);
                         } else {
@@ -344,7 +588,5 @@
         }
     });
 </script>
-<script async="async" data-cfasync="false" src="https://pl30779413.effectivecpmnetwork.com/1999feaaa82158d4820ec3a45b8ec139/invoke.js"></script>
-<div id="container-1999feaaa82158d4820ec3a45b8ec139"></div>
 </body>
 </html>
