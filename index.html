@@ -537,7 +537,7 @@
                 <div class="tl-node ${idx === 0 ? 'tl-latest' : ''}" style="animation-delay:${idx * 60}ms">
                     <div class="tl-time">${escHtml(h.timestamp || '')}</div>
                     <div class="tl-status">${escHtml(h.status || '')}</div>
-                    ${h.images && h.images.length ? `<div class="tl-imgs">${h.images.map(src => `<img class="tl-thumb" src="${escHtml(src)}" onclick="event.stopPropagation(); openLightbox('${escHtml(src)}')">`).join('')}</div>` : ''}
+                    ${h.images && h.images.length ? `<div class="tl-imgs">${h.images.map(src => `<img class="tl-thumb" loading="lazy" decoding="async" src="${escHtml(src)}" onclick="event.stopPropagation(); openLightbox('${escHtml(src)}')">`).join('')}</div>` : ''}
                 </div>
             `).join('');
         }
